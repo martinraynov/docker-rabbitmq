@@ -1,0 +1,30 @@
+networks:
+  default:
+    external: true
+    name: lb-common
+
+services:
+  rabbitmq:
+    # depends_on:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.rabbitmq.entrypoints=web"
+      - "traefik.http.routers.rabbitmq.rule=Host(`rmq.local.io`)"
+      - "traefik.http.routers.rabbitmq.service=svc_rabbitmq"
+      - "traefik.http.services.svc_rabbitmq.loadbalancer.server.port=5672"
+      
+      - "traefik.http.routers.rabbitmq_ui.entrypoints=web"
+      - "traefik.http.routers.rabbitmq_ui.rule=Host(`rmq-ui.local.io`)"
+      - "traefik.http.routers.rabbitmq_ui.service=svc_rabbitmq_ui"
+      - "traefik.http.services.svc_rabbitmq_ui.loadbalancer.server.port=15672"
+    # volumes:
+    #   - rabbitmq_volume:/var/lib/rabbitmq:rw
+    environment:
+      RABBITMQ_DEFAULT_USER: "rmq"
+      RABBITMQ_DEFAULT_PASS: "rmq"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    networks:
+      - default
